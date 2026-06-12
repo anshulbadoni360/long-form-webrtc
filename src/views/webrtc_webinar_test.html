@@ -1,0 +1,534 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>WebRTC Webinar Test</title>
+        <style>
+            body {
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    Roboto,
+                    "Segoe UI",
+                    Arial;
+                margin: 16px;
+            }
+            .controls {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            label {
+                font-size: 14px;
+                margin-right: 6px;
+            }
+            input[type="text"],
+            select {
+                padding: 6px 8px;
+                font-size: 14px;
+                width: 260px;
+            }
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            #videos {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .video-card {
+                border: 1px solid #ddd;
+                padding: 6px;
+                border-radius: 6px;
+                background: #fafafa;
+            }
+            video {
+                width: 100%;
+                height: 160px;
+                background: #000;
+            }
+            .meta {
+                font-size: 12px;
+                color: #444;
+                margin-top: 6px;
+            }
+            #log {
+                white-space: pre-wrap;
+                font-family: monospace;
+                margin-top: 12px;
+                background: #111;
+                color: #eee;
+                padding: 8px;
+                height: 140px;
+                overflow: auto;
+                border-radius: 6px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>WebRTC Webinar Test Page</h2>
+        <p>
+            Creator sees all participant streams. Participants only publish
+            their stream to the creator (do not subscribe).
+        </p>
+
+        <div class="controls">
+            <label>Signaling WS URL</label>
+            <input id="wsUrl" type="text" value="ws://localhost:3000" />
+            <label>Room</label>
+            <input id="roomId" type="text" value="test-room" />
+            <label>Role</label>
+            <select id="role">
+                <option value="creator">Creator (see all)</option>
+                <option value="participant">Participant (publish only)</option>
+            </select>
+            <button id="connectBtn">Connect & Join</button>
+
+            <button id="toggleCamBtn" disabled>Start Camera</button>
+            <button id="toggleAudioBtn" disabled>Mute/Unmute</button>
+            <button id="leaveBtn" disabled>Leave</button>
+        </div>
+
+        <div id="localContainer" class="video-card" style="max-width: 320px">
+            <div><strong>Local preview</strong></div>
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div class="meta" id="localMeta"></div>
+        </div>
+
+        <h3>Remote streams</h3>
+        <div id="videos"></div>
+
+        <h3>Log</h3>
+        <div id="log"></div>
+
+        <script>
+            /*
+Signaling protocol expected:
+- Client -> server messages:
+  { type: 'join', room, role }
+  { type: 'offer', to, from, room, sdp }
+  { type: 'answer', to, from, room, sdp }
+  { type: 'candidate', to, from, room, candidate }
+  { type: 'leave', room, from }
+
+- Server -> client messages:
+  { type: 'joined', id, users: [{id, role}] }           // response to a join
+  { type: 'user-joined', id, role }                     // broadcast when new user joins
+  { type: 'offer'|'answer'|'candidate', from, to, sdp?, candidate? } // forwarded between clients
+  { type: 'user-left', id }                             // when someone leaves
+
+This page assumes the server forwards messages by the 'to' field and includes 'from' on forwarded messages.
+*/
+            (function () {
+                const logEl = document.getElementById("log");
+                function log(...args) {
+                    console.log(...args);
+                    logEl.textContent +=
+                        args
+                            .map((a) =>
+                                typeof a === "object" ? JSON.stringify(a) : a,
+                            )
+                            .join(" ") + "\n";
+                    logEl.scrollTop = logEl.scrollHeight;
+                }
+
+                const wsUrlInput = document.getElementById("wsUrl");
+                const roomInput = document.getElementById("roomId");
+                const roleSelect = document.getElementById("role");
+                const connectBtn = document.getElementById("connectBtn");
+                const toggleCamBtn = document.getElementById("toggleCamBtn");
+                const toggleAudioBtn =
+                    document.getElementById("toggleAudioBtn");
+                const leaveBtn = document.getElementById("leaveBtn");
+
+                const localVideo = document.getElementById("localVideo");
+                const localMeta = document.getElementById("localMeta");
+                const videosDiv = document.getElementById("videos");
+
+                let ws;
+                let clientId = null;
+                let room = "";
+                let role = "participant";
+                let localStream = null;
+                let pcs = {}; // map remoteId -> RTCPeerConnection
+                let remoteStreams = {}; // remoteId -> MediaStream
+
+                const pcConfig = {
+                    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+                };
+
+                connectBtn.onclick = async () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        log("Already connected");
+                        return;
+                    }
+                    const url = wsUrlInput.value.trim();
+                    room = roomInput.value.trim();
+                    role = roleSelect.value;
+                    if (!url || !room) {
+                        alert("Provide WS URL and room");
+                        return;
+                    }
+                    log("Connecting to", url);
+                    ws = new WebSocket(url);
+                    ws.onopen = () => {
+                        log("WS open - joining room", room, "as", role);
+                        send({ type: "join", room, role });
+                    };
+                    ws.onmessage = (ev) => {
+                        let msg;
+                        try {
+                            msg = JSON.parse(ev.data);
+                        } catch (e) {
+                            log("Invalid JSON", ev.data);
+                            return;
+                        }
+                        handleSignal(msg);
+                    };
+                    ws.onclose = () => {
+                        log("WS closed");
+                        cleanupAll();
+                    };
+                    ws.onerror = (e) => {
+                        log("WS error", e);
+                    };
+                };
+
+                function send(obj) {
+                    if (!ws || ws.readyState !== WebSocket.OPEN) {
+                        log("WS not open, cannot send", obj);
+                        return;
+                    }
+                    ws.send(JSON.stringify(obj));
+                }
+
+                async function handleSignal(msg) {
+                    log("SIGNAL", msg);
+                    const t = msg.type;
+                    if (t === "joined") {
+                        clientId = msg.id;
+                        localMeta.textContent = `You: ${clientId} (${role})`;
+                        leaveBtn.disabled = false;
+                        toggleCamBtn.disabled = false;
+                        toggleAudioBtn.disabled = false;
+                        // users array may contain existing users (including creator)
+                        if (msg.users && Array.isArray(msg.users)) {
+                            const users = msg.users;
+                            // If participant: attempt to find creator and start publishing to them
+                            if (role === "participant") {
+                                const creator = users.find(
+                                    (u) => u.role === "creator",
+                                );
+                                if (creator) {
+                                    log(
+                                        "Found creator",
+                                        creator.id,
+                                        "- publishing to creator",
+                                    );
+                                    // createLocalAndPublish will lookup creatorId when started
+                                    await createLocalStreamIfNeeded();
+                                    await publishTo(creator.id);
+                                } else {
+                                    log(
+                                        "No creator in room yet. Will publish when creator appears.",
+                                    );
+                                    await createLocalStreamIfNeeded();
+                                }
+                            }
+                            // If creator: nothing to do yet; wait for offers from participants
+                        }
+                    } else if (t === "user-joined") {
+                        // Someone joined
+                        if (msg.role === "creator") {
+                            log("Creator joined:", msg.id);
+                            if (role === "participant") {
+                                // publish to creator now
+                                await createLocalStreamIfNeeded();
+                                await publishTo(msg.id);
+                            }
+                        } else {
+                            // a participant joined
+                            log("Participant joined:", msg.id);
+                            // Creator does not proactively call; wait for an offer from the participant
+                        }
+                    } else if (t === "offer" && msg.to === clientId) {
+                        // Creator receives offer from participant
+                        if (role !== "creator") {
+                            log("Received offer but not creator — ignoring");
+                            return;
+                        }
+                        const from = msg.from;
+                        await handleOffer(from, msg.sdp);
+                    } else if (t === "answer" && msg.to === clientId) {
+                        // Participant receives answer from creator
+                        if (role !== "participant") {
+                            log(
+                                "Received answer but not participant — ignoring",
+                            );
+                            return;
+                        }
+                        const from = msg.from;
+                        await receiveAnswer(from, msg.sdp);
+                    } else if (t === "candidate" && msg.to === clientId) {
+                        const from = msg.from;
+                        const candidate = msg.candidate;
+                        if (pcs[from]) {
+                            try {
+                                await pcs[from].addIceCandidate(candidate);
+                                log("Added remote candidate from", from);
+                            } catch (e) {
+                                log("Error adding remote candidate", e);
+                            }
+                        } else {
+                            log("No peer connection for candidate from", from);
+                        }
+                    } else if (t === "user-left") {
+                        removePeer(msg.id);
+                    } else {
+                        log("Unhandled message", msg);
+                    }
+                }
+
+                async function createLocalStreamIfNeeded() {
+                    if (localStream) return;
+                    try {
+                        localStream = await navigator.mediaDevices.getUserMedia(
+                            { audio: true, video: true },
+                        );
+                        localVideo.srcObject = localStream;
+                        localVideo.muted = true;
+                        localMeta.textContent = `You: ${clientId || "(not joined)"} (${role}) — publishing: ${localStream.getVideoTracks().length}v ${localStream.getAudioTracks().length}a`;
+                        toggleCamBtn.textContent = "Stop Camera";
+                        toggleCamBtn.disabled = false;
+                    } catch (e) {
+                        log("getUserMedia error", e);
+                        alert("Could not get camera/microphone: " + e.message);
+                    }
+                }
+
+                async function publishTo(targetId) {
+                    if (!localStream) {
+                        log("No local stream, creating it");
+                        await createLocalStreamIfNeeded();
+                    }
+                    if (pcs[targetId]) {
+                        log("Already publishing to", targetId);
+                        return;
+                    }
+                    const pc = new RTCPeerConnection(pcConfig);
+                    pcs[targetId] = pc;
+
+                    pc.onicecandidate = (ev) => {
+                        if (ev.candidate) {
+                            send({
+                                type: "candidate",
+                                to: targetId,
+                                from: clientId,
+                                room,
+                                candidate: ev.candidate,
+                            });
+                        }
+                    };
+
+                    // Participant will not listen for tracks; for the sake of safety we still attach ontrack if present.
+                    pc.ontrack = (ev) => {
+                        log("ontrack on participant for", targetId, ev.streams);
+                        // Do not attach for participants (they shouldn't subscribe). We still ignore or could show if desired.
+                    };
+
+                    // Add local tracks (publish)
+                    for (const t of localStream.getTracks()) {
+                        pc.addTrack(t, localStream);
+                    }
+
+                    try {
+                        const offer = await pc.createOffer(); // default sends our tracks
+                        await pc.setLocalDescription(offer);
+                        send({
+                            type: "offer",
+                            to: targetId,
+                            from: clientId,
+                            room,
+                            sdp: pc.localDescription.sdp,
+                        });
+                        log("Sent offer to", targetId);
+                    } catch (e) {
+                        log("Error creating/sending offer", e);
+                    }
+                }
+
+                async function handleOffer(fromId, sdp) {
+                    // Creator receives an offer from a participant (participant is publishing)
+                    // Create PC for that participant, setRemoteDescription(offer), createAnswer, setLocalDesc, send answer
+                    if (pcs[fromId]) {
+                        log("Already have pc for", fromId, "— closing old one");
+                        removePeer(fromId);
+                    }
+                    const pc = new RTCPeerConnection(pcConfig);
+                    pcs[fromId] = pc;
+
+                    pc.onicecandidate = (ev) => {
+                        if (ev.candidate) {
+                            send({
+                                type: "candidate",
+                                to: fromId,
+                                from: clientId,
+                                room,
+                                candidate: ev.candidate,
+                            });
+                        }
+                    };
+
+                    pc.ontrack = (ev) => {
+                        log("Creator: ontrack from", fromId, ev.streams);
+                        const stream =
+                            ev.streams && ev.streams[0]
+                                ? ev.streams[0]
+                                : new MediaStream(ev.track ? [ev.track] : []);
+                        attachRemoteStream(fromId, stream);
+                    };
+
+                    try {
+                        await pc.setRemoteDescription({ type: "offer", sdp });
+                        // Creator does not need to add local tracks unless they want to send something back.
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        send({
+                            type: "answer",
+                            to: fromId,
+                            from: clientId,
+                            room,
+                            sdp: pc.localDescription.sdp,
+                        });
+                        log("Sent answer to", fromId);
+                    } catch (e) {
+                        log("Error handling offer", e);
+                        removePeer(fromId);
+                    }
+                }
+
+                async function receiveAnswer(fromId, sdp) {
+                    const pc = pcs[fromId];
+                    if (!pc) {
+                        log("No pc for answer from", fromId);
+                        return;
+                    }
+                    try {
+                        await pc.setRemoteDescription({ type: "answer", sdp });
+                        log("Set remote answer for", fromId);
+                    } catch (e) {
+                        log("Error setting remote answer", e);
+                    }
+                }
+
+                function attachRemoteStream(id, stream) {
+                    remoteStreams[id] = stream;
+                    let card = document.getElementById("card-" + id);
+                    if (!card) {
+                        card = document.createElement("div");
+                        card.className = "video-card";
+                        card.id = "card-" + id;
+                        const v = document.createElement("video");
+                        v.id = "video-" + id;
+                        v.autoplay = true;
+                        v.playsInline = true;
+                        v.controls = false;
+                        const label = document.createElement("div");
+                        label.className = "meta";
+                        label.textContent = "User: " + id;
+                        card.appendChild(v);
+                        card.appendChild(label);
+                        videosDiv.appendChild(card);
+                    }
+                    const videoEl = document.getElementById("video-" + id);
+                    videoEl.srcObject = stream;
+                }
+
+                function removePeer(id) {
+                    if (pcs[id]) {
+                        try {
+                            pcs[id].close();
+                        } catch (e) {
+                            /* ignore */
+                        }
+                        delete pcs[id];
+                    }
+                    if (remoteStreams[id]) delete remoteStreams[id];
+                    const card = document.getElementById("card-" + id);
+                    if (card) card.remove();
+                }
+
+                // UI buttons
+                toggleCamBtn.onclick = async () => {
+                    if (!localStream) {
+                        await createLocalStreamIfNeeded();
+                        // If participant and creator present, ensure publishing pipeline exists
+                        if (role === "participant") {
+                            // ask server for current users? We don't have that — rely on existing creator publish flow or user-joined events.
+                        }
+                        return;
+                    }
+                    const videoTrack = localStream.getVideoTracks()[0];
+                    if (!videoTrack) return;
+                    if (videoTrack.enabled) {
+                        videoTrack.enabled = false;
+                        toggleCamBtn.textContent = "Start Camera";
+                    } else {
+                        videoTrack.enabled = true;
+                        toggleCamBtn.textContent = "Stop Camera";
+                    }
+                };
+
+                toggleAudioBtn.onclick = () => {
+                    if (!localStream) return;
+                    const audioTrack = localStream.getAudioTracks()[0];
+                    if (!audioTrack) return;
+                    audioTrack.enabled = !audioTrack.enabled;
+                    toggleAudioBtn.textContent = audioTrack.enabled
+                        ? "Mute"
+                        : "Unmute";
+                };
+
+                leaveBtn.onclick = () => {
+                    send({ type: "leave", room, from: clientId });
+                    if (ws) ws.close();
+                    cleanupAll();
+                };
+
+                function cleanupAll() {
+                    if (localStream) {
+                        for (const t of localStream.getTracks()) t.stop();
+                        localStream = null;
+                    }
+                    localVideo.srcObject = null;
+                    localMeta.textContent = "";
+                    for (const id in pcs) {
+                        try {
+                            pcs[id].close();
+                        } catch (e) {}
+                    }
+                    pcs = {};
+                    remoteStreams = {};
+                    videosDiv.innerHTML = "";
+                    clientId = null;
+                    leaveBtn.disabled = true;
+                    toggleCamBtn.disabled = true;
+                    toggleAudioBtn.disabled = true;
+                    log("Cleaned up");
+                }
+
+                // when page unload, notify server
+                window.addEventListener("beforeunload", () => {
+                    try {
+                        if (ws && ws.readyState === WebSocket.OPEN)
+                            send({ type: "leave", room, from: clientId });
+                    } catch (e) {}
+                });
+            })();
+        </script>
+    </body>
+</html>
