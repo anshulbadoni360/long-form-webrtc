@@ -3,7 +3,7 @@ import log from "../services/logger/log";
 
 export const connectDatabase = async (): Promise<void> => {
   const MONGO_URI =
-    process.env.MONGO_URI?.trim() || "mongodb://localhost:27017/monet_live";
+    process.env.MONGO_URI?.trim() || "mongodb://localhost:27017/longform";
 
   try {
     await mongoose.connect(MONGO_URI);

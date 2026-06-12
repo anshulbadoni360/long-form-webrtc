@@ -15,7 +15,8 @@ import janusService from "./services/webrtc/janus.service";
 import janusConfig from "./config";
 import { ResponseDto } from "./services/DTO";
 
-import metricsService from "./services/instance/metrics.service";
+// we don't need metrics service here as we don't have autoscaling here
+// import metricsService from "./services/instance/metrics.service";
 
 import { resolvePublicIp, formatIpToRoute } from "./utils/normalize";
 
@@ -32,7 +33,6 @@ app.use(
 );
 
 app.use(room);
-app.use("/many", room);
 app.use(profile);
 app.use(admin);
 
@@ -66,14 +66,10 @@ const bootstrapServer = async () => {
       }
     });
 
-    metricsService.startMonitoring(ip);
+    // metricsService.startMonitoring(ip);
 
     app.get("/healthcheck", (req: Request, res: Response) => {
-      res
-        .status(200)
-        .json(
-          ResponseDto.ok(metricsService.state, "Slave server health stats"),
-        );
+      res.status(200).json(ResponseDto.ok("Server is running"));
     });
 
     app.use((req: Request, res: Response) => {
@@ -98,7 +94,7 @@ bootstrapServer();
 const gracefulShutdown = async () => {
   log.info("Shutting down gracefully...");
 
-  metricsService.stopMonitoring();
+  // metricsService.stopMonitoring();
   janusService.disconnect();
 
   await mongoose.disconnect();

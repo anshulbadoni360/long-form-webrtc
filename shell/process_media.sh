@@ -30,8 +30,8 @@ echo "Found Video: $VIDEOFILE"
 if [ -f "$AUDIOFILE" ]; then
     echo "Converting Audio..."
     /opt/janus/bin/janus-pp-rec "$AUDIOFILE" /tmp/${ID}.opus
-    # upload audio mjr to s3 
-    aws s3 mv "$AUDIOFILE" s3://monet-live-videos/monetlive/mjr-audio/${ROOMID}/${ID}-audio.mjr --acl public-read
+    # upload audio mjr to s3
+    aws s3 mv "$AUDIOFILE" s3://monet-live-videos/longform/mjr-audio/${ROOMID}/${ID}-audio.mjr --acl public-read
 fi
 
 # 3. Process Video if found
@@ -39,7 +39,7 @@ if [ -f "$VIDEOFILE" ]; then
     echo "Converting Video..."
     /opt/janus/bin/janus-pp-rec "$VIDEOFILE" /tmp/${ID}.webm
     # upload video mjr to s3
-    aws s3 mv "$VIDEOFILE" s3://monet-live-videos/monetlive/mjr-video/${ROOMID}/${ID}-video.mjr --acl public-read
+    aws s3 mv "$VIDEOFILE" s3://monet-live-videos/longform/mjr-video/${ROOMID}/${ID}-video.mjr --acl public-read
 fi
 
 # 4. Merge if both converted successfully
@@ -53,11 +53,11 @@ fi
 # 5. Export to S3 (checks both merged and video-only)
 if [ -f /tmp/${ID}-merged.webm ]; then
     echo "Exporting merged video to S3..."
-    aws s3 mv /tmp/${ID}-merged.webm s3://monet-live-videos/monetlive/merged-video/${ROOMID}/${ID}.webm --acl public-read
+    aws s3 mv /tmp/${ID}-merged.webm s3://monet-live-videos/longform/merged-video/${ROOMID}/${ID}.webm --acl public-read
     echo "Export SUCCESS: ${ID}.webm"
 elif [ -f /tmp/${ID}.webm ]; then
     echo "Exporting video-only to S3..."
-    aws s3 mv /tmp/${ID}.webm s3://monet-live-videos/monetlive/video-only/${ROOMID}/${ID}.webm --acl public-read
+    aws s3 mv /tmp/${ID}.webm s3://monet-live-videos/longform/video-only/${ROOMID}/${ID}.webm --acl public-read
     echo "Export SUCCESS: ${ID}.webm (No audio)"
 else
     echo "Error: No files found to export."
