@@ -1,0 +1,1047 @@
+<!doctype html>
+<html class="light" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Slave Server Management | Settings</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            outline: "#737686",
+                            "on-primary": "#ffffff",
+                            "surface-bright": "#f8f9fa",
+                            "primary-fixed-dim": "#b4c5ff",
+                            "on-background": "#191c1d",
+                            "error-container": "#ffdad6",
+                            primary: "#004ac6",
+                            "on-tertiary-fixed-variant": "#7d2d00",
+                            "on-secondary": "#ffffff",
+                            background: "#f8f9fa",
+                            "tertiary-container": "#bc4800",
+                            "on-secondary-fixed": "#0b1c30",
+                            "on-surface-variant": "#434655",
+                            "tertiary-fixed-dim": "#ffb596",
+                            "surface-tint": "#0053db",
+                            "on-error-container": "#93000a",
+                            "on-tertiary-fixed": "#360f00",
+                            "tertiary-fixed": "#ffdbcd",
+                            "inverse-surface": "#2e3132",
+                            "on-surface": "#191c1d",
+                            "surface-container-low": "#f3f4f5",
+                            secondary: "#505f76",
+                            "on-secondary-container": "#54647a",
+                            tertiary: "#943700",
+                            "secondary-fixed": "#d3e4fe",
+                            "surface-container-lowest": "#ffffff",
+                            "on-tertiary-container": "#ffede6",
+                            "on-primary-fixed-variant": "#003ea8",
+                            surface: "#f8f9fa",
+                            "inverse-primary": "#b4c5ff",
+                            "surface-container-highest": "#e1e3e4",
+                            "on-error": "#ffffff",
+                            "secondary-container": "#d0e1fb",
+                            "inverse-on-surface": "#f0f1f2",
+                            "surface-dim": "#d9dadb",
+                            "secondary-fixed-dim": "#b7c8e1",
+                            "on-primary-container": "#eeefff",
+                            error: "#ba1a1a",
+                            "surface-variant": "#e1e3e4",
+                            "surface-container": "#edeeef",
+                            "primary-container": "#2563eb",
+                            "on-primary-fixed": "#00174b",
+                            "on-secondary-fixed-variant": "#38485d",
+                            "surface-container-high": "#e7e8e9",
+                            "primary-fixed": "#dbe1ff",
+                            "outline-variant": "#c3c6d7",
+                            "on-tertiary": "#ffffff",
+                            "on-surface-variant": "#434655",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.25rem",
+                            lg: "0.5rem",
+                            xl: "0.75rem",
+                            full: "9999px",
+                        },
+                        spacing: {
+                            "component-padding-x": "16px",
+                            "margin-page": "32px",
+                            "grid-columns": "12",
+                            "component-padding-y": "12px",
+                            base: "4px",
+                            gutter: "24px",
+                        },
+                        fontFamily: {
+                            "display-lg": ["Geist"],
+                            "headline-sm": ["Geist"],
+                            "headline-md": ["Geist"],
+                            "body-lg": ["Geist"],
+                            "label-sm": ["JetBrains Mono"],
+                            "label-md": ["JetBrains Mono"],
+                            "body-md": ["Geist"],
+                        },
+                        fontSize: {
+                            "display-lg": [
+                                "36px",
+                                {
+                                    lineHeight: "44px",
+                                    letterSpacing: "-0.02em",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "headline-sm": [
+                                "18px",
+                                { lineHeight: "28px", fontWeight: "600" },
+                            ],
+                            "headline-md": [
+                                "24px",
+                                {
+                                    lineHeight: "32px",
+                                    letterSpacing: "-0.01em",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "body-lg": [
+                                "16px",
+                                { lineHeight: "24px", fontWeight: "400" },
+                            ],
+                            "label-sm": [
+                                "11px",
+                                { lineHeight: "14px", fontWeight: "500" },
+                            ],
+                            "label-md": [
+                                "12px",
+                                { lineHeight: "16px", fontWeight: "500" },
+                            ],
+                            "body-md": [
+                                "14px",
+                                { lineHeight: "20px", fontWeight: "400" },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            body {
+                font-family: "Geist", sans-serif;
+                -webkit-font-smoothing: antialiased;
+            }
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 300,
+                    "GRAD" 0,
+                    "opsz" 24;
+                vertical-align: middle;
+                font-size: 20px;
+            }
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 4px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #e5e7eb;
+                border-radius: 10px;
+            }
+            .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #434655;
+            }
+            .fade-in {
+                animation: fadeIn 0.2s ease-out;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-4px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    </head>
+    <body
+        class="bg-background dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface min-h-screen m-0 p-0"
+    >
+        <!-- Login View -->
+        <div
+            id="loginView"
+            class="flex items-center justify-center h-screen w-full"
+        >
+            <div class="w-full max-w-md px-6">
+                <div class="mb-10">
+                    <h1
+                        class="font-headline-md text-headline-md tracking-tight mb-2 text-on-surface dark:text-inverse-on-surface"
+                    >
+                        Slave Server Control
+                    </h1>
+                    <p
+                        class="text-body-md text-on-surface-variant dark:text-outline-variant"
+                    >
+                        Sign in to access runtime server configuration
+                    </p>
+                </div>
+
+                <form id="loginForm" class="flex flex-col gap-5">
+                    <div class="flex flex-col gap-2">
+                        <label
+                            class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant"
+                            >Username</label
+                        >
+                        <input
+                            id="loginUsername"
+                            type="text"
+                            required
+                            class="bg-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-3 py-2.5 text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:bg-inverse-surface"
+                            placeholder="anshulbadoni"
+                            value="anshulbadoni"
+                        />
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label
+                            class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant"
+                            >Password</label
+                        >
+                        <input
+                            id="loginPassword"
+                            type="password"
+                            required
+                            class="bg-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-3 py-2.5 text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:bg-inverse-surface"
+                            placeholder="••••••••"
+                            value="anshulbadoni"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-primary text-on-primary font-label-md text-label-md py-2.5 rounded-lg hover:opacity-90 active:scale-95 transition-all mt-2"
+                    >
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="mt-8 text-center">
+                    <button
+                        onclick="toggleTheme()"
+                        class="p-2 rounded-lg hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors inline-flex items-center justify-center"
+                    >
+                        <span
+                            class="material-symbols-outlined text-outline"
+                            id="theme-icon-login"
+                            >light_mode</span
+                        >
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- End Login View -->
+
+        <!-- Main Container - Full Page -->
+        <div id="settingsView" class="flex flex-col h-screen w-full hidden">
+            <!-- Header -->
+            <header
+                class="flex justify-between items-center h-16 px-gutter border-b border-outline-variant dark:border-on-surface-variant shrink-0 bg-surface-container-lowest dark:bg-inverse-surface"
+            >
+                <h1
+                    class="font-headline-md text-headline-md tracking-tight"
+                    id="pageTitle"
+                >
+                    Slave Diagnostics & Configuration
+                </h1>
+                <div class="flex items-center gap-3">
+                    <button
+                        class="p-2 rounded-lg hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors flex items-center justify-center"
+                        onclick="toggleTheme()"
+                    >
+                        <span class="material-symbols-outlined" id="theme-icon"
+                            >light_mode</span
+                        >
+                    </button>
+                    <button
+                        onclick="saveAll()"
+                        class="bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:opacity-90 active:scale-95 transition-all"
+                    >
+                        Save Changes
+                    </button>
+                    <button
+                        onclick="signOut()"
+                        class="p-2 rounded-lg hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors flex items-center justify-center"
+                        title="Sign out"
+                    >
+                        <span class="material-symbols-outlined text-outline"
+                            >logout</span
+                        >
+                    </button>
+                </div>
+            </header>
+
+            <!-- Navbar Tabs -->
+            <nav
+                class="flex gap-1 px-gutter border-b border-outline-variant dark:border-on-surface-variant bg-surface-container-lowest dark:bg-inverse-surface shrink-0"
+            >
+                <button
+                    onclick="switchTab('diagnostics')"
+                    id="tab-diagnostics"
+                    class="tab-btn px-4 py-3 text-body-md font-medium border-b-2 border-primary text-primary"
+                >
+                    Diagnostics
+                </button>
+                <button
+                    onclick="switchTab('logs')"
+                    id="tab-logs"
+                    class="tab-btn px-4 py-3 text-body-md font-medium border-b-2 border-transparent text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface"
+                >
+                    Logs
+                </button>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="flex-1 flex overflow-hidden relative">
+                <!-- ═══ DIAGNOSTICS TAB ═══ -->
+                <div
+                    id="panel-diagnostics"
+                    class="tab-panel flex flex-col lg:flex-row w-full overflow-hidden"
+                >
+                    <!-- Left Sidebar: Threshold Config -->
+                    <div
+                        class="w-full lg:w-2/5 border-b lg:border-b-0 lg:border-r border-outline-variant dark:border-on-surface-variant p-gutter flex flex-col gap-6 lg:overflow-y-auto lg:custom-scrollbar bg-surface-container-lowest dark:bg-inverse-surface shrink-0"
+                    >
+                        <section class="flex flex-col gap-8">
+                            <div>
+                                <h2
+                                    class="font-headline-sm text-label-md text-outline dark:text-outline-variant uppercase tracking-wider mb-6"
+                                >
+                                    Host Config
+                                </h2>
+                                <div class="grid grid-cols-2 gap-x-6 gap-y-6">
+                                    <div class="flex flex-col gap-2 col-span-2">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant"
+                                            >Public IP Address</label
+                                        >
+                                        <div class="relative">
+                                            <span
+                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-outline-variant"
+                                            >
+                                                <span
+                                                    class="material-symbols-outlined !text-[18px]"
+                                                    >dns</span
+                                                >
+                                            </span>
+                                            <input
+                                                id="publicIp"
+                                                class="w-full bg-surface border border-outline-variant dark:border-on-surface-variant rounded-lg pl-10 pr-3 py-2.5 text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:bg-inverse-surface"
+                                                type="text"
+                                                placeholder="127.0.0.1"
+                                            />
+                                        </div>
+                                        <p
+                                            class="text-[12px] text-on-surface-variant dark:text-outline-variant mt-1"
+                                        >
+                                            Public endpoint IP registered with
+                                            the autoscale controller.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr
+                                class="border-outline-variant dark:border-on-surface-variant"
+                            />
+
+                            <div>
+                                <h2
+                                    class="font-headline-sm text-label-md text-outline dark:text-outline-variant uppercase tracking-wider mb-6"
+                                >
+                                    Occupancy Thresholds
+                                </h2>
+                                <div class="grid grid-cols-2 gap-x-6 gap-y-6">
+                                    <div class="flex flex-col gap-2">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant"
+                                            >CPU Limit</label
+                                        >
+                                        <div class="relative">
+                                            <input
+                                                id="cpuThreshold"
+                                                class="w-full bg-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-3 py-2 text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:bg-inverse-surface"
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            <span
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant font-label-md"
+                                                >%</span
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant"
+                                            >RAM Limit</label
+                                        >
+                                        <div class="relative">
+                                            <input
+                                                id="ramThreshold"
+                                                class="w-full bg-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-3 py-2 text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:bg-inverse-surface"
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            <span
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant font-label-md"
+                                                >%</span
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Right Side Panel: Diagnostics and Status -->
+                    <div
+                        class="flex-1 p-gutter flex flex-col gap-6 lg:overflow-y-auto bg-background dark:bg-inverse-surface"
+                    >
+                        <!-- Live Stats Cards -->
+                        <section>
+                            <h2
+                                class="font-headline-sm text-label-md text-outline dark:text-outline-variant uppercase tracking-wider mb-4"
+                            >
+                                Instance Load Metrics
+                            </h2>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div
+                                    class="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/60 dark:border-on-surface-variant/20 p-4 rounded-xl shadow-sm"
+                                >
+                                    <span
+                                        class="text-[12px] text-on-surface-variant dark:text-outline-variant font-medium"
+                                        >CPU Usage</span
+                                    >
+                                    <div
+                                        id="stat-cpu"
+                                        class="text-2xl font-bold tracking-tight mt-1"
+                                    >
+                                        0%
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/60 dark:border-on-surface-variant/20 p-4 rounded-xl shadow-sm"
+                                >
+                                    <span
+                                        class="text-[12px] text-on-surface-variant dark:text-outline-variant font-medium"
+                                        >RAM Usage</span
+                                    >
+                                    <div
+                                        id="stat-ram"
+                                        class="text-2xl font-bold tracking-tight mt-1"
+                                    >
+                                        0%
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/60 dark:border-on-surface-variant/20 p-4 rounded-xl shadow-sm"
+                                >
+                                    <span
+                                        class="text-[12px] text-on-surface-variant dark:text-outline-variant font-medium"
+                                        >Active Calls</span
+                                    >
+                                    <div
+                                        id="stat-calls"
+                                        class="text-2xl font-bold tracking-tight mt-1"
+                                    >
+                                        0
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant/60 dark:border-on-surface-variant/20 p-4 rounded-xl shadow-sm flex flex-col justify-between"
+                                >
+                                    <span
+                                        class="text-[12px] text-on-surface-variant dark:text-outline-variant font-medium"
+                                        >State</span
+                                    >
+                                    <div class="mt-1">
+                                        <span
+                                            id="stat-occupied"
+                                            class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[11px] font-medium"
+                                        >
+                                            <span
+                                                class="w-1.5 h-1.5 bg-emerald-500 rounded-full"
+                                            ></span>
+                                            Free
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Realtime Diagnostic Logs/Overview -->
+                        <section class="flex-1 flex flex-col min-h-[300px]">
+                            <h2
+                                class="font-headline-sm text-label-md text-outline dark:text-outline-variant uppercase tracking-wider mb-4"
+                            >
+                                Active Meetings
+                            </h2>
+                            <div
+                                class="flex-1 border border-outline-variant dark:border-on-surface-variant rounded-lg overflow-hidden flex flex-col bg-surface-container-lowest dark:bg-inverse-surface"
+                            >
+                                <!-- Table Header -->
+                                <div
+                                    class="grid grid-cols-[1.5fr_1.2fr_1fr_1fr_90px] px-4 py-3 bg-surface-container-low dark:bg-on-surface-variant/20 border-b border-outline-variant dark:border-on-surface-variant font-label-sm text-label-sm text-outline uppercase tracking-tight shrink-0"
+                                >
+                                    <span>Room ID</span>
+                                    <span>Status</span>
+                                    <span>Active Users</span>
+                                    <span>Sampling Rate</span>
+                                    <span class="text-right">Actions</span>
+                                </div>
+
+                                <!-- Room Row list -->
+                                <div
+                                    id="activeRoomsList"
+                                    class="flex-1 overflow-y-auto custom-scrollbar text-body-md"
+                                >
+                                    <div
+                                        class="p-6 text-center text-on-surface-variant dark:text-outline-variant text-sm"
+                                    >
+                                        No active meetings running on this node.
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ═══ LOGS TAB ═══ -->
+                <div
+                    id="panel-logs"
+                    class="tab-panel hidden w-full overflow-hidden flex flex-col bg-background dark:bg-inverse-surface"
+                >
+                    <div class="p-gutter flex-1 flex flex-col min-h-0">
+                        <div
+                            class="flex items-center justify-between mb-4 shrink-0"
+                        >
+                            <div class="flex items-center gap-3">
+                                <h2
+                                    class="font-headline-sm text-label-md text-outline dark:text-outline-variant uppercase tracking-wider"
+                                >
+                                    Event Log
+                                </h2>
+                                <span
+                                    class="inline-flex items-center gap-1.5 bg-surface border border-outline-variant dark:border-on-surface-variant px-2 py-0.5 rounded-full text-[11px] font-medium"
+                                    id="logCount"
+                                >
+                                    -- events
+                                </span>
+                                <!-- FILTER -->
+                                <select
+                                    id="logFilter"
+                                    onchange="filterLogs()"
+                                    class="bg-surface dark:bg-inverse-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-2.5 py-1 text-[11px] font-medium text-on-surface-variant dark:text-outline-variant outline-none focus:ring-1 focus:ring-primary cursor-pointer h-7"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="info">Info</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="error">Error</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    onclick="fetchLogs()"
+                                    class="bg-primary text-on-primary rounded-lg px-3 py-1.5 text-label-md hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm"
+                                >
+                                    <span
+                                        class="material-symbols-outlined !text-[14px]"
+                                        >refresh</span
+                                    >
+                                    Refresh Logs
+                                </button>
+                                <button
+                                    onclick="clearLogs()"
+                                    class="bg-surface dark:bg-inverse-surface border border-outline-variant dark:border-on-surface-variant rounded-lg px-3 py-1.5 text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-low dark:hover:bg-on-surface-variant/20 transition-colors flex items-center gap-1.5"
+                                >
+                                    <span
+                                        class="material-symbols-outlined !text-[14px]"
+                                        >delete_sweep</span
+                                    >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex-1 border border-outline-variant dark:border-on-surface-variant rounded-lg overflow-hidden bg-surface-container-lowest dark:bg-inverse-surface flex flex-col min-h-0"
+                        >
+                            <div
+                                class="grid grid-cols-[110px_100px_1fr_140px] gap-4 px-4 py-3 bg-surface-container-low dark:bg-on-surface-variant/20 border-b border-outline-variant dark:border-on-surface-variant font-label-sm text-label-sm text-outline uppercase tracking-tight shrink-0"
+                            >
+                                <span>Time</span>
+                                <span>Level</span>
+                                <span>Event</span>
+                                <span>Source</span>
+                            </div>
+                            <div
+                                id="logList"
+                                class="flex-1 overflow-y-auto custom-scrollbar font-label-md text-label-md"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div
+            id="toast"
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-body-md px-5 py-2.5 rounded-lg shadow-lg hidden fade-in z-50"
+        ></div>
+
+        <script>
+            const getApiBase = () => {
+                const path = window.location.pathname;
+                const match =
+                    path.match(/^(\/slave\/[^/]+\/many)/) ||
+                    path.match(/^(\/many)/);
+                const prefix = match ? match[1] : "";
+                return `${window.location.origin}${prefix}`;
+            };
+            const API_BASE = getApiBase();
+            let token = localStorage.getItem("slave_admin_token");
+
+            // ── Theme Manager ──
+            function toggleTheme() {
+                const isDark =
+                    document.documentElement.classList.toggle("dark");
+                localStorage.setItem("theme", isDark ? "dark" : "light");
+                updateThemeIcons(isDark);
+            }
+
+            function updateThemeIcons(isDark) {
+                const themeIcon = document.getElementById("theme-icon");
+                const themeIconLogin =
+                    document.getElementById("theme-icon-login");
+                if (themeIcon)
+                    themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+                if (themeIconLogin)
+                    themeIconLogin.textContent = isDark
+                        ? "light_mode"
+                        : "dark_mode";
+            }
+
+            // Init theme
+            const savedTheme = localStorage.getItem("theme");
+            if (
+                savedTheme === "dark" ||
+                (!savedTheme &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ) {
+                document.documentElement.classList.add("dark");
+                updateThemeIcons(true);
+            } else {
+                document.documentElement.classList.remove("dark");
+                updateThemeIcons(false);
+            }
+
+            // ── Toast Utility ──
+            function toast(message) {
+                const t = document.getElementById("toast");
+                t.textContent = message;
+                t.classList.remove("hidden");
+                setTimeout(() => t.classList.add("hidden"), 3000);
+            }
+
+            // ── Authentication ──
+            document
+                .getElementById("loginForm")
+                .addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const username =
+                        document.getElementById("loginUsername").value;
+                    const password =
+                        document.getElementById("loginPassword").value;
+
+                    try {
+                        const res = await fetch(`${API_BASE}/api/admin/login`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ username, password }),
+                        });
+
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            token = data.data.token;
+                            localStorage.setItem("slave_admin_token", token);
+                            showDashboard();
+                            toast("Signed in successfully");
+                        } else {
+                            toast(
+                                data.message ||
+                                    "Invalid authentication credentials",
+                            );
+                        }
+                    } catch (err) {
+                        toast("Server request failed");
+                    }
+                });
+
+            function signOut() {
+                localStorage.removeItem("slave_admin_token");
+                token = null;
+                document.getElementById("settingsView").classList.add("hidden");
+                document.getElementById("loginView").classList.remove("hidden");
+                toast("Logged out successfully");
+            }
+
+            // ── Load & Save Settings ──
+            async function fetchSettings() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/admin/settings`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+
+                    if (res.status === 401) {
+                        signOut();
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        const config = data.data;
+                        document.getElementById("cpuThreshold").value =
+                            config.cpuThreshold;
+                        document.getElementById("ramThreshold").value =
+                            config.ramThreshold;
+                        document.getElementById("publicIp").value =
+                            config.publicIp;
+
+                        // Diagnostics
+                        document.getElementById("stat-cpu").textContent =
+                            `${config.stats.CPU}%`;
+                        document.getElementById("stat-ram").textContent =
+                            `${config.stats.RAM}%`;
+                        document.getElementById("stat-calls").textContent =
+                            config.stats.Calls;
+
+                        // State
+                        const stateBadge =
+                            document.getElementById("stat-occupied");
+                        if (config.stats.occupied) {
+                            stateBadge.innerHTML = `
+                                <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                                Occupied
+                            `;
+                            stateBadge.className =
+                                "inline-flex items-center gap-1 bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 px-2 py-0.5 rounded-full text-[11px] font-medium";
+                        } else {
+                            stateBadge.innerHTML = `
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                Free
+                            `;
+                            stateBadge.className =
+                                "inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[11px] font-medium";
+                        }
+
+                        // Populate Room sessions
+                        fetchRooms();
+                    }
+                } catch (err) {
+                    console.error("Failed to refresh stats", err);
+                }
+            }
+
+            async function fetchRooms() {
+                try {
+                    // Fetch list of rooms from active instances
+                    const res = await fetch(`${API_BASE}/api/rooms`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    const listContainer =
+                        document.getElementById("activeRoomsList");
+
+                    if (
+                        res.ok &&
+                        data.success &&
+                        data.data &&
+                        data.data.length > 0
+                    ) {
+                        listContainer.innerHTML = data.data
+                            .map((room) => {
+                                const badgeBg = room.active
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                    : "bg-gray-100 text-gray-600 dark:bg-gray-800/30 dark:text-gray-400";
+                                const dotColor = room.active
+                                    ? "bg-emerald-500"
+                                    : "bg-gray-400";
+                                const label = room.active
+                                    ? "Active"
+                                    : "Inactive";
+
+                                return `
+                                <div class="grid grid-cols-[1.5fr_1.2fr_1fr_1fr_90px] px-4 py-3 border-b border-outline-variant/30 dark:border-on-surface-variant/10 items-center hover:bg-surface-container-low dark:hover:bg-on-surface-variant/10 transition-colors text-xs md:text-sm">
+                                    <span class="font-label-md font-medium text-on-surface dark:text-inverse-on-surface truncate">${room.roomid}</span>
+                                    <div>
+                                        <span class="inline-flex items-center gap-1.5 ${badgeBg} px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-medium">
+                                            <span class="w-1.5 h-1.5 ${dotColor} rounded-full"></span>
+                                            ${label}
+                                        </span>
+                                    </div>
+                                    <span class="font-label-md">${room.participants}</span>
+                                    <span class="font-mono text-[11px] md:text-[12px] opacity-75">${room.realTimeScores}s</span>
+                                    <div class="text-right">
+                                        <button
+                                            onclick="killRoom('${room.roomid}')"
+                                            class="bg-error/10 hover:bg-error hover:text-white text-error border border-error/20 hover:border-transparent px-2.5 py-1 rounded text-[10px] md:text-[11px] font-medium transition-all active:scale-95"
+                                        >
+                                            Kill
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            })
+                            .join("");
+                    } else {
+                        listContainer.innerHTML = `
+                            <div class="p-6 text-center text-on-surface-variant dark:text-outline-variant text-sm">
+                                No active meetings running on this node.
+                            </div>
+                        `;
+                    }
+                } catch (err) {
+                    console.error("Failed to load active sessions", err);
+                }
+            }
+
+            async function killRoom(roomid) {
+                if (
+                    !confirm(
+                        `Are you sure you want to terminate meeting room ${roomid}? This will disconnect all users and save final metrics.`,
+                    )
+                ) {
+                    return;
+                }
+                try {
+                    const res = await fetch(`${API_BASE}/api/rooms/${roomid}`, {
+                        method: "DELETE",
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        toast(`Room ${roomid} terminated successfully`);
+                        fetchRooms();
+                    } else {
+                        toast(data.message || "Failed to terminate room");
+                    }
+                } catch (err) {
+                    toast("Request failed");
+                }
+            }
+
+            async function saveAll() {
+                const cpu = Number(
+                    document.getElementById("cpuThreshold").value,
+                );
+                const ram = Number(
+                    document.getElementById("ramThreshold").value,
+                );
+                const ip = document.getElementById("publicIp").value;
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/admin/settings`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            cpuThreshold: cpu,
+                            ramThreshold: ram,
+                            publicIp: ip,
+                        }),
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        toast("Runtime configurations saved successfully");
+                        fetchSettings();
+                    } else {
+                        toast(
+                            data.message ||
+                                "Failed to update runtime configurations",
+                        );
+                    }
+                } catch (err) {
+                    toast("Request failed");
+                }
+            }
+
+            // ── Switch Tabs ──
+            let activeTab = "diagnostics";
+            const tabTitles = {
+                diagnostics: "Slave Diagnostics & Configuration",
+                logs: "Slave Logs",
+            };
+
+            function switchTab(tab) {
+                activeTab = tab;
+                document
+                    .querySelectorAll(".tab-panel")
+                    .forEach((p) => p.classList.add("hidden"));
+                document.querySelectorAll(".tab-btn").forEach((b) => {
+                    b.classList.remove("border-primary", "text-primary");
+                    b.classList.add(
+                        "border-transparent",
+                        "text-on-surface-variant",
+                        "dark:text-outline-variant",
+                    );
+                });
+                const panel = document.getElementById(`panel-${tab}`);
+                const btn = document.getElementById(`tab-${tab}`);
+                if (panel) panel.classList.remove("hidden");
+                if (btn) {
+                    btn.classList.add("border-primary", "text-primary");
+                    btn.classList.remove(
+                        "border-transparent",
+                        "text-on-surface-variant",
+                        "dark:text-outline-variant",
+                    );
+                }
+                document.getElementById("pageTitle").textContent =
+                    tabTitles[tab] || "Diagnostics";
+
+                if (tab === "logs") {
+                    fetchLogs();
+                }
+            }
+
+            // ── Logs ──
+            let logs = [];
+            let currentLogFilter = "all";
+
+            function filterLogs() {
+                currentLogFilter = document.getElementById("logFilter").value;
+                renderLogs();
+            }
+
+            function levelColor(level) {
+                if (level === "error") return "text-error";
+                if (level === "warning")
+                    return "text-amber-600 dark:text-amber-400";
+                return "text-on-surface-variant dark:text-outline-variant";
+            }
+
+            function renderLogs() {
+                const list = document.getElementById("logList");
+                if (!list) return;
+
+                const filtered = logs.filter((l) => {
+                    if (currentLogFilter === "all") return true;
+                    return l.level === currentLogFilter;
+                });
+
+                list.innerHTML = filtered
+                    .map(
+                        (l) => `
+                    <div class="grid grid-cols-[110px_100px_1fr_140px] gap-4 px-4 py-2.5 border-b border-outline-variant/30 dark:border-on-surface-variant/10 items-center hover:bg-surface-container-low dark:hover:bg-on-surface-variant/10 transition-colors">
+                        <span class="text-on-surface-variant dark:text-outline-variant text-[12px]">
+                            ${l.time}
+                        </span>
+                        <span class="${levelColor(l.level)} uppercase tracking-tight font-semibold text-[11px]">
+                            ${l.level}
+                        </span>
+                        <span class="text-on-surface dark:text-inverse-on-surface truncate text-sm">
+                            ${l.event}
+                        </span>
+                        <span class="text-on-surface-variant dark:text-outline-variant truncate text-[12px]">
+                            ${l.source}
+                        </span>
+                    </div>
+                `,
+                    )
+                    .join("");
+
+                const counter = document.getElementById("logCount");
+                if (counter) {
+                    counter.textContent = `${filtered.length} events`;
+                }
+
+                // Auto-scroll to bottom
+                requestAnimationFrame(() => {
+                    list.scrollTop = list.scrollHeight;
+                });
+            }
+
+            function clearLogs() {
+                logs = [];
+                renderLogs();
+                toast("Logs cleared");
+            }
+
+            async function fetchLogs() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/admin/logs`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+
+                    if (res.status === 401) {
+                        signOut();
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (res.ok && data.success && Array.isArray(data.data)) {
+                        logs = data.data.sort(
+                            (a, b) =>
+                                new Date(`1970/01/01 ${a.time}`) -
+                                new Date(`1970/01/01 ${b.time}`),
+                        );
+                        renderLogs();
+                        toast("Logs updated");
+                    }
+                } catch (err) {
+                    console.error("Failed to load logs", err);
+                    toast("Failed to retrieve logs");
+                }
+            }
+
+            function showDashboard() {
+                document.getElementById("loginView").classList.add("hidden");
+                document
+                    .getElementById("settingsView")
+                    .classList.remove("hidden");
+                fetchSettings();
+                setInterval(() => {
+                    if (token) {
+                        if (activeTab === "diagnostics") {
+                            fetchSettings();
+                        } else if (activeTab === "logs") {
+                            fetchLogs();
+                        }
+                    }
+                }, 5000);
+            }
+
+            // Init
+            if (token) {
+                showDashboard();
+            }
+        </script>
+    </body>
+</html>

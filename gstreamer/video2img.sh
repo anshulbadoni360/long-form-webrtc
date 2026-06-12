@@ -1,0 +1,1 @@
+gst-launch-1.0 -ev udpsrc port=$1 caps="application/x-rtp, media=(string)video, clock-rate=(int)90000" ! rtpvp8depay ! vp8dec ! videoconvert ! videoscale ! video/x-raw,width=640,height=480 ! videorate ! video/x-raw,framerate='(fraction)'1/$2 ! jpegenc ! multifilesink location="$3/img%04d.jpg"
